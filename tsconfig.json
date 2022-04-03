@@ -1,0 +1,53 @@
+{
+	"compilerOptions": {
+		"rootDir": "./",
+		"allowJs": true,
+		"checkJs": false,
+		"importHelpers": false,
+		"sourceMap": true,
+		"declaration": true,
+		"declarationMap": true,
+		"inlineSourceMap": false,
+		"noImplicitAny": false,
+		"module": "commonjs",
+		"target": "es2020",
+		"lib": ["es2020"],
+		"moduleResolution": "node",
+		"forceConsistentCasingInFileNames": true,
+		"noImplicitReturns": true,
+		"noImplicitThis": true,
+		"strictNullChecks": true,
+		"suppressImplicitAnyIndexErrors": true,
+		"resolveJsonModule": true,
+		"allowSyntheticDefaultImports": true,
+		"esModuleInterop": true,
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true,
+		"outDir": "./dist",
+		"baseUrl": ".",
+		"paths": {
+			"/opt/nodejs/*": [
+				"./src/layers/*"
+			],
+			"@application/*": [
+				"./src/*"
+			],
+			"@tests/*": [
+				"./tests/*"
+			]
+		}
+	},
+	"include": [
+		"src",
+		"tests"
+	],
+	"exclude": [
+		"node_modules",
+		"build",
+		"webpack",
+		"dist"
+	],
+	"types": [
+		"typePatches"
+	]
+}

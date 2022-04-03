@@ -1,0 +1,30 @@
+{
+	"javascript.format.insertSpaceBeforeFunctionParenthesis": false,
+	"javascript.format.insertSpaceAfterFunctionKeywordForAnonymousFunctions": false,
+	"eslint.format.enable": true,
+	"cSpell.enabled": false,
+	"editor.codeActionsOnSave": {
+		"source.fixAll.eslint": true
+	},
+	"files.exclude": {
+		"**/.git": true,
+		"**/.svn": true,
+		"**/.hg": true,
+		"**/CVS": true,
+		"**/.DS_Store": true,
+		"node_modules": true,
+		"package-lock.json": true,
+		"**/*.js": {
+			"when": "$(basename).ts"
+		},
+		"**/*.d.ts": {
+			"when": "$(basename).ts"
+		},
+		"**/*.ts.map": {
+			"when": "$(basename)"
+		},
+		"**/*.js.map": {
+			"when": "$(basename)"
+		}
+	}
+}

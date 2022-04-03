@@ -1,0 +1,12 @@
+/coverage/
+/layers/
+/node_modules/
+/dependencies-layer/nodejs/
+/utils-layer/nodejs/
+/dist/
+/dist-fake-api/
+/.serverless/
+*.zip
+package-lock.json
+*.d.ts
+*.d.ts.map

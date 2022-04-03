@@ -1,0 +1,30 @@
+version: "3"
+services:
+    sqs-login-app:
+        container_name: sqs-login-app
+        image: softwaremill/elasticmq-native
+        ports:
+            - "9324:9324"
+            - "9325:9325"
+    sls-login-app:
+        container_name: sls-login-app
+        build: .
+        volumes:
+            - .:/app
+        ports:
+            - "5000:5000"
+            - "5001:5001"
+            - "9282:9282"
+        depends_on:
+            - sqs-login-app
+            - redis-login-app
+        environment:
+            - SLS_DEBUG=*
+            - NODE_ENV=test
+            - NODE_PATH=./dist/utils/:./
+        command: bash -c "npm-watch watch-src-offline"
+    redis-login-app:
+        image: redis
+        container_name: redis-login-app
+        ports:
+            - "9379:6379"

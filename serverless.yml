@@ -1,0 +1,182 @@
+service: boirlerplate-serverless-app
+
+package:
+  individually: true
+  excludeDevDependencies: false
+  exclude:
+    - "src/**"
+    - "build/**"
+    - "tsconfig.json"
+    - "node_modules/**"
+    - "readme.md"
+    - "Dockerfile"
+    - "docker-compose.yml"
+    - "dist/**"
+    - "tests/**"
+    - "test-setup.js"
+    - "test-setup.js.map"
+    - ".editorconfig"
+    - ".eslintignore"
+    - ".eslintrc.json"
+    - "package.json"
+    - "package-lock.json"
+    - ".gitignore"
+    - ".gitattributes"
+    - "layers/**"
+    - "bitbucket-pipelines.yml"
+    - "dev.env.yml"
+    - "prod.env.yml"
+    - ".vscode/**"
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  logRetentionInDays: 30
+  environment: ${file(${opt:stage, "dev"}.env.yml)}
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - sqs:SendMessage
+        - sqs:ReceiveMessage
+        - sqs:DeleteMessage
+        - sqs:GetQueueAttributes
+      Resource:
+        - !Sub "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${self:service}-*"
+    - Effect: Allow
+      Action:
+        - ec2:DescribeNetworkInterfaces
+        - ec2:CreateNetworkInterface
+        - ec2:DeleteNetworkInterface
+        - ec2:DescribeInstances
+        - ec2:AttachNetworkInterface
+      Resource:
+        - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:${self:service}-*"
+    - Effect: Allow
+      Action:
+        - logs:CreateLogGroup
+        - logs:CreateLogStream
+        - logs:DescribeLogStreams
+        - logs:PutLogEvents
+        - logs:GetLogEvents
+        - logs:PutRetentionPolicy
+      Resource:
+        - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
+    - Effect: Allow
+      Action:
+        - s3:GetBucketLocation
+        - s3:ListBucket
+        - s3:PutObject
+        - s3:GetObject
+      Resource:
+        - !Sub "arn:aws:s3:::*"
+
+  websocketsApiRouteSelectionExpression: "$request.body.route"
+
+layers:
+  dependenciesNodeModules:
+    path: dependencies-layer
+    name: ${opt:stage, self:provider.stage, "dev"}-layer-dependencies
+    description: Node modules layer # optional, Description to publish to AWS
+    compatibleRuntimes: # optional, a list of runtimes this layer is compatible with
+      - nodejs12.x
+    licenseInfo: GPLv3
+    retain: false
+
+  utils:
+    path: layers/utils
+    name: ${opt:stage, self:provider.stage, "dev"}-layer-utils
+    description: Sqs functions # optional, Description to publish to AWS
+    compatibleRuntimes: # optional, a list of runtimes this layer is compatible with
+      - nodejs12.x
+    licenseInfo: GPLv3
+    retain: false
+
+  business:
+    path: layers/business
+    name: ${opt:stage, self:provider.stage, "dev"}-layer-business
+    description: Sqs functions # optional, Description to publish to AWS
+    compatibleRuntimes: # optional, a list of runtimes this layer is compatible with
+      - nodejs12.x
+    licenseInfo: GPLv3
+    retain: false
+
+functions:
+
+  app:
+    timeout: ${self:provider.environment.CLOUD_WATCH_LOG_LAMBDA_TIMEOUT}
+    handler: dist/src/handlers/app.handler
+    description: "Responsavel pela entrada de orders no sistema"
+    package:
+      include:
+        - dist/src/handlers/app.js
+    events:
+      - http:
+          path: /app
+          method: post
+          cors: true
+    layers:
+      - { Ref: DependenciesNodeModulesLambdaLayer }
+      - { Ref: UtilsLambdaLayer }
+      - { Ref: BusinessLambdaLayer }
+
+  auth:
+    timeout: ${self:provider.environment.CLOUD_WATCH_LOG_LAMBDA_TIMEOUT}
+    handler: dist/src/handlers/auth.handler
+    description: "Responsavel pela autenticação do parceiro no sistema"
+    package:
+      include:
+        - dist/src/handlers/auth.js
+    events:
+      - http:
+          path: /auth
+          method: post
+          cors: true
+    layers:
+      - { Ref: DependenciesNodeModulesLambdaLayer }
+      - { Ref: UtilsLambdaLayer }
+      - { Ref: BusinessLambdaLayer }
+
+resources:
+  Resources:
+    QueueCloudWatchLogs:
+      Type: "AWS::SQS::Queue"
+      Properties:
+        # Description: "Fila usada para processar logs no Cloud Watch"
+        QueueName: ${self:custom.QueueCloudWatchLogs}
+
+
+custom:
+
+  QueueTest: ${self:service}-queue-test.fifo
+  QueueCloudWatchLogs: ${self:service}-queue-cloud-watch-logs
+  QueueGetOpenMerchantsForPolling: ${self:service}-queue-merchants-pooling.fifo
+  QueueGetOpenMerchantsForPollingTimer: ${self:service}-queue-merchants-pooling-timer
+  QueueRegisterEvent: ${self:service}-queue-register-event.fifo
+  QueueProcessEvent: ${self:service}-queue-process-event
+  QueueNewEvent: ${self:service}-queue-new-event
+  QueueNewOrder: ${self:service}-queue-new-order
+  QueuePartnerUpdateStatus: ${self:service}-queue-partner-update-status
+  QueueRefreshToken: ${self:service}-queue-refresh-token.fifo
+
+  serverless-offline:
+    host: 0.0.0.0
+    httpPort: 5000
+    websocketPort: 5001
+    noAuth: true
+    noPrependStageInUrl: true
+    port: 4000
+
+  serverless-offline-sqs:
+    autoCreate: true
+    apiVersion: "2012-11-05"
+    endpoint: http://sqs:9324
+    region: us-west-2
+    accessKeyId: root
+    secretAccessKey: root
+    skipCacheInvalidation: false
+    readInterval: 500
+
+plugins:
+  - serverless-offline-sqs-vini
+  - serverless-offline

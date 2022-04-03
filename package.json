@@ -1,0 +1,105 @@
+{
+	"name": "boirlerplate-serverless-app",
+	"version": "1.0.0",
+	"description": "Template para application na aws",
+	"main": "index.ts",
+	"scripts": {
+		"test": "node node_modules/jest/bin/jest.js",
+		"test-watch": "node node_modules/jest/bin/jest.js --watchAll --coverage --no-cache",
+		"build-dependencies-layer": "node build/build-dependencies-layer.js",
+		"build-utils-layer": "npm run build-tsc && node build/build-utils-layer.js",
+		"build-tsc": "node node_modules/typescript/bin/tsc",
+		"deploy": "npm run build-tsc && npm run build-dependencies-layer && npm run build-utils-layer && sls deploy",
+		"offline": "npm i && docker-compose up",
+		"docker-local-sqs": "docker-compose up -d",
+		"start-offline": "node --inspect=0.0.0.0:9282 /usr/local/lib/node_modules/serverless/bin/serverless.js offline",
+		"watch-src-offline": "npm run build-tsc && export SLS_DEBUG=* && export AWS_ACCESS_KEY_ID=root && export AWS_SECRET_ACCESS_KEY=root && export AWS_DEFAULT_REGION=us-west-2 && npm run start-offline"
+	},
+	"watch": {
+		"watch-src-offline": {
+			"patterns": [
+				"src"
+			],
+			"extensions": "ts",
+			"quiet": true,
+			"legacyWatch": true,
+			"delay": 2500,
+			"runOnChangeOnly": false
+		},
+		"watch-src-fake-api": {
+			"patterns": [
+				"src",
+				"tests"
+			],
+			"extensions": "ts",
+			"quiet": true,
+			"legacyWatch": true,
+			"delay": 2500,
+			"runOnChangeOnly": false
+		}
+	},
+	"jest": {
+		"preset": "ts-jest",
+		"testEnvironment": "node",
+		"globals": {
+			"ts-jest": {
+				"tsconfig": "tsconfig.json",
+				"diagnostics": true
+			}
+		},
+		"testMatch": [
+			"**/?(*.)+(spec|test).[t]s?(x)"
+		],
+		"rootDir": "./",
+		"setupFiles": [
+			"<rootDir>/tests/test-setup.ts"
+		],
+		"moduleNameMapper": {
+			"^@application/(.*)$": "<rootDir>/src/$1",
+			"^/opt/nodejs/(.*)$": "<rootDir>/src/layers/$1",
+			"^@tests/(.*)$": "<rootDir>/tests/$1"
+		}
+	},
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"aws-lambda": "^1.0.6",
+		"aws-sdk": "^2.437.0",
+		"axios": "^0.21.1",
+		"class-validator": "^0.13.1",
+		"jsonwebtoken": "^8.5.1",
+		"redis": "^3.1.2",
+		"source-map-support": "^0.5.19",
+		"uuid": "^8.3.2"
+	},
+	"devDependencies": {
+		"@types/aws-lambda": "^8.10.77",
+		"@types/jest": "^26.0.23",
+		"@types/redis": "^2.8.29",
+		"@typescript-eslint/eslint-plugin": "^4.26.1",
+		"@typescript-eslint/parser": "^4.26.1",
+		"date-fns": "^2.22.1",
+		"eslint": "6.8.0",
+		"eslint-config-standard": "^14.1.0",
+		"eslint-plugin-import": "^2.18.2",
+		"eslint-plugin-jest": "^24.2.0",
+		"eslint-plugin-node": "^10.0.0",
+		"eslint-plugin-promise": "^4.2.1",
+		"eslint-plugin-standard": "^4.0.1",
+		"express": "^4.17.1",
+		"fs-extra": "^10.0.0",
+		"jest": "^26.6.3",
+		"jest-plugins": "^2.9.0",
+		"moxios": "^0.4.0",
+		"nodemon": "^2.0.12",
+		"package-lock.json": "^1.0.0",
+		"redis-mock": "^0.56.3",
+		"serverless-domain-manager": "^5.1.0",
+		"serverless-offline": "^7.0.0",
+		"serverless-offline-sqs-vini": "^5.1.2",
+		"ts-jest": "^26.4.3",
+		"ts-node": "^9.1.1",
+		"tsconfig-paths": "^3.9.0",
+		"typescript": "^4.0.5"
+	}
+}
