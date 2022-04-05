@@ -6,6 +6,7 @@ import { AwsSqsHelper } from '/opt/nodejs/utils/aws-sqs'
 import { LogsHelper } from '/opt/nodejs/utils/logs'
 import { LogsMapper } from '/opt/nodejs/business/mappers/logs'
 import { LAMBDA_LOG_EVENT } from '/opt/nodejs/utils/constants'
+import { EventHandlerMapper } from '/opt/nodejs/business/mappers/event-handler'
 
 export const handler = async (event: ProxyEvent): Promise<ProxyResult> => {
 	
@@ -20,16 +21,14 @@ export const handler = async (event: ProxyEvent): Promise<ProxyResult> => {
 
     try {
         await logs.info(LogsMapper.lambdaEventToLogEvent(LAMBDA_LOG_EVENT.AUTH, event))
-    
-        console.log('--------------------------------------')
-        console.log(' ')
-        console.log(' ')
-        console.log('--------------------------------------')
+
+        const auth = EventHandlerMapper.httpAuthToReadBody(event)
+
+        result.body = auth
     } catch (error) {
         throw error
     }
-
-
+  
 	return result
 
 }
