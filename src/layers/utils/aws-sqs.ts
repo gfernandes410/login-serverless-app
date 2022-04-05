@@ -21,9 +21,10 @@ export class AwsSqsHelper {
 	}
 
 	async sendMessage (queueParams: SQS.SendMessageRequest): Promise<any> {
-		const resultMessage = await this.sqs.sendMessage(queueParams).promise()
+		// const resultMessage = await this.sqs.sendMessage(queueParams).promise()
 
-		// const resultMessage = 'SALVOU'
+		// TODO FIX
+		const resultMessage = {MessageId: 123}
 
 		return resultMessage
 	}
