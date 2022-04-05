@@ -1,5 +1,5 @@
 {
-	"name": "boirlerplate-serverless-app",
+	"name": "login-serverless-app",
 	"version": "1.0.0",
 	"description": "Template para application na aws",
 	"main": "index.ts",
@@ -19,17 +19,6 @@
 		"watch-src-offline": {
 			"patterns": [
 				"src"
-			],
-			"extensions": "ts",
-			"quiet": true,
-			"legacyWatch": true,
-			"delay": 2500,
-			"runOnChangeOnly": false
-		},
-		"watch-src-fake-api": {
-			"patterns": [
-				"src",
-				"tests"
 			],
 			"extensions": "ts",
 			"quiet": true,
